@@ -7,8 +7,18 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp']
 
+  # Step 3: Deploy to GKE
+
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'set'
+      - 'image'
+      - 'deployment/demo-app'
+      - 'demo-app=us-central1-docker.pkg.dev/$PROJECT_ID/demo-repo/demo-app'
+
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp'
 
 options:
   logging: CLOUD_LOGGING_ONLY
+

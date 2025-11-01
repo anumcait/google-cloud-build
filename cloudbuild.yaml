@@ -14,18 +14,17 @@ steps:
     args:
       ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp:latest']
 
-  # 🚀 Step 3: Deploy updated image to GKE
-  - name: 'gcr.io/cloud-builders/kubectl'
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'          # <-- your GKE zone
-      - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'        # <-- your cluster name
+  # 🚀 Step 3: Get GKE credentials
+  - name: 'gcr.io/cloud-builders/gcloud'
     args:
-      [
-        'set',
-        'image',
-        'deployment/demo-app',
-        'demo-app=us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp:latest'
-      ]
+      ['container', 'clusters', 'get-credentials', 'my-cluster', '--zone', 'us-central1-a']
+
+  # 🌱 Step 4: Apply Deployment and Service YAMLs
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: ['apply', '-f', 'deployment.yaml']
+
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: ['apply', '-f', 'service.yaml']
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp:latest'

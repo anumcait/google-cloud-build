@@ -1,24 +1,34 @@
 steps:
-  # Step 1: Build Docker image
+  # 🏗 Step 1: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp', '.']
-
-  # Step 2: Push to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp']
-
-  # Step 3: Deploy to GKE
-
-  - name: 'gcr.io/cloud-builders/kubectl'
     args:
-      - 'set'
-      - 'image'
-      - 'deployment/demo-app'
-      - 'demo-app=us-central1-docker.pkg.dev/$PROJECT_ID/demo-repo/demo-app'
+      [
+        'build',
+        '-t',
+        'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp:latest',
+        '.'
+      ]
+
+  # 📦 Step 2: Push image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp:latest']
+
+  # 🚀 Step 3: Deploy updated image to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'          # <-- your GKE zone
+      - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'        # <-- your cluster name
+    args:
+      [
+        'set',
+        'image',
+        'deployment/demo-app',
+        'demo-app=us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp:latest'
+      ]
 
 images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app-repo/myapp:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
-
